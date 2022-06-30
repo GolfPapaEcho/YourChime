@@ -5,7 +5,7 @@ const int medPin = 4;// the number of the meditation pin
 const int solenoidPin = 13; // the number of the solenoid pin
 
 // Variables will change:
-int solenoidState = LOW;         // the current state of the output pin
+//int solenoidState = LOW;         // the current state of the output pin
 int etButtonState;                // the current etReading from the input pin
 int medButtonState;               // current medReading 
 int lastEtButtonState = LOW;   // the previous etReading from the input pin
@@ -17,13 +17,24 @@ unsigned long lastEtDebounceTime = 0;
 unsigned long lastMedDebounceTime = 0; // the last time the output pin was toggsolenoid
 unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
 
+  // trigger solenoid:
+  int fireSolenoid(){
+    digitalWrite(solenoidPin, HIGH);
+    unsigned long timer1 = millis();
+    while (millis() - timer1 < 200){}
+    digitalWrite(solenoidPin, LOW);
+  }
+
 void setup() {
   pinMode(etPin, INPUT);
   pinMode(medPin, INPUT);
   pinMode(solenoidPin, OUTPUT);
 
   // set initial solenoid state
-  digitalWrite(solenoidPin, solenoidState);
+  digitalWrite(solenoidPin, LOW);
+
+
+  
 }
 
 void loop() {
@@ -53,7 +64,7 @@ void loop() {
 
       // only toggle the solenoid if the new button state is HIGH
       if (etButtonState == HIGH) {
-        solenoidState = !solenoidState;
+         fireSolenoid();
       }
     }
   }
@@ -68,14 +79,13 @@ void loop() {
 
       // only toggle the solenoid if the new button state is HIGH
       if (medButtonState == HIGH) {
-        solenoidState = !solenoidState;
+        fireSolenoid();
       }
     }
   }
 
-  // set the solenoid:
-  digitalWrite(solenoidPin, solenoidState);
-
+  
+  
   // save the Reading. Next time through the loop, it'll be the lastEt/MedButtonState:
   lastEtButtonState = etReading;
   lastMedButtonState = medReading;
