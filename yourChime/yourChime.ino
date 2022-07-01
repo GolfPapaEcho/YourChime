@@ -17,9 +17,15 @@ unsigned long lastEtDebounceTime = 0;
 unsigned long lastMedDebounceTime = 0; // the last time the output pin was toggsolenoid
 unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
 unsigned long interButtonDelay = 2000;
-bool etBool;
-bool medBool;  
-  
+unsigned long switchPollDelay = 125;
+byte etBool;
+byte medBool;
+//byte *eB;
+//byte *mB;
+
+byte etReading;
+byte medReading;
+
   // trigger solenoid:
   int fireSolenoid(){
     digitalWrite(solenoidPin, HIGH);
@@ -37,62 +43,67 @@ void setup() {
   // set initial solenoid state
   digitalWrite(solenoidPin, 0);
 
-
   
 }
 
 void loop() {
-  // read the state of the switches into a local variables:
-  byte etReading = digitalRead(etPin);
-  byte medReading = digitalRead(medPin);
-  // check to see if you just pressed a button
-  // (i.e. the input went from LOW to HIGH), and you've waited long enough
-  // since the last press to ignore any noise:
+ 
+  if (millis() % switchPollDelay == 0){
+    // read the state of the switches into a local variables:
+    etReading = digitalRead(etPin);
+    medReading = digitalRead(medPin);
+    // check to see if you just pressed a button
+    // (i.e. the input went from LOW to HIGH), and you've waited long enough
+    // since the last press to ignore any noise:
 
-  // If the switch changed, due to noise or pressing:
-  if (etReading != lastEtButtonState)  {
+    // If the switch changed, due to noise or pressing:
+    if (etReading != lastEtButtonState)  {
     // reset the debouncing timer
     lastEtDebounceTime = millis();
-  }
-  if (medReading != lastMedButtonState) {
-     lastMedDebounceTime = millis();
-  }
+    }
+    if (medReading != lastMedButtonState) {
+      lastMedDebounceTime = millis();
+    }
 
-  if ((millis() - lastEtDebounceTime) > debounceDelay) {
-    // whatever the etReading is at, it's been there for longer than the debounce
-    // delay, so take it as the actual current state:
+    if ((millis() - lastEtDebounceTime) > debounceDelay) {
+      // whatever the etReading is at, it's been there for longer than the debounce
+      // delay, so take it as the actual current state:
 
-    // if the button state has changed:
-    if (etReading != etButtonState) {
-      etButtonState = etReading;
+      // if the button state has changed:
+      if (etReading != etButtonState) {
+        etButtonState = etReading;
 
-      // only toggle the solenoid if the new button state is HIGH
-      if (etButtonState == 1) {
-         fireSolenoid();
-         etBool = true;
+        // only toggle the solenoid if the new button state is HIGH
+        if (etButtonState == 1) {
+          fireSolenoid();
+          etBool = 1;
+        }
       }
     }
-  }
 
     if ((millis() - lastMedDebounceTime) > debounceDelay) {
-    // whatever the etReading is at, it's been there for longer than the debounce
-    // delay, so take it as the actual current state:
+      // whatever the medReading is at, it's been there for longer than the debounce
+      // delay, so take it as the actual current state:
 
-    // if the button state has changed:
-    if (medReading != medButtonState) {
-      medButtonState = medReading;
+      // if the button state has changed:
+      if (medReading != medButtonState) {
+        medButtonState = medReading;
 
       // only toggle the solenoid if the new button state is HIGH
       if (medButtonState == 1) {
         fireSolenoid();
-        medBool = true;
+        medBool = 1;
       }
     }
   }
+       // save the Reading. Next time through the loop, it'll be the lastEt/MedButtonState:
+  lastEtButtonState = etReading;
+  lastMedButtonState = medReading; 
+ }
 
   if ((millis() - lastEtDebounceTime > interButtonDelay) || (millis() - lastMedDebounceTime > interButtonDelay)){
-    etBool = false;
-    medBool = false;
+    etBool = 0;
+    medBool = 0;
   }
 
   if (etBool && medBool){
@@ -103,7 +114,5 @@ void loop() {
     while (millis() - timer2 < 355){}
     fireSolenoid();
     }
-  // save the Reading. Next time through the loop, it'll be the lastEt/MedButtonState:
-  lastEtButtonState = etReading;
-  lastMedButtonState = medReading;
+
 }
