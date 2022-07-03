@@ -20,6 +20,7 @@ unsigned long interButtonDelay = 2000;
 unsigned long switchPollDelay = 125;
 byte etBool;
 byte medBool;
+int ms;
 //byte *eB;
 //byte *mB;
 
@@ -30,28 +31,16 @@ byte medReading;
   int fireSolenoid(){
     digitalWrite(solenoidPin, HIGH);
     unsigned long timer1 = millis();
-    while (millis() - timer1 < 100){}
+    while (millis() - timer1 < 200){}
     digitalWrite(solenoidPin, LOW);
+    Serial.print("\nFired Solenoid");
   }
 
-
-void setup() {
-  pinMode(etPin, INPUT);
-  pinMode(medPin, INPUT);
-  pinMode(solenoidPin, OUTPUT);
-
-  // set initial solenoid state
-  digitalWrite(solenoidPin, 0);
-
-  
-}
-
-void loop() {
- 
-  if (millis() % switchPollDelay == 0){
+  void pollSwitches(){
     // read the state of the switches into a local variables:
     etReading = digitalRead(etPin);
     medReading = digitalRead(medPin);
+    //Serial.print("done Reading");
     // check to see if you just pressed a button
     // (i.e. the input went from LOW to HIGH), and you've waited long enough
     // since the last press to ignore any noise:
@@ -75,8 +64,9 @@ void loop() {
 
         // only toggle the solenoid if the new button state is HIGH
         if (etButtonState == 1) {
-          fireSolenoid();
           etBool = 1;
+          //Serial.print("\netBool=1");
+          //delay(200);
         }
       }
     }
@@ -91,28 +81,64 @@ void loop() {
 
       // only toggle the solenoid if the new button state is HIGH
       if (medButtonState == 1) {
-        fireSolenoid();
         medBool = 1;
+        //Serial.print("\nmedBool=1");
+        //delay(200);
       }
     }
   }
-       // save the Reading. Next time through the loop, it'll be the lastEt/MedButtonState:
+// save the Reading. Next time through the loop, it'll be the lastEt/MedButtonState:
   lastEtButtonState = etReading;
-  lastMedButtonState = medReading; 
- }
+  //Serial.println("\nreached lastEtButtonState");
+  //delay(200);
+  lastMedButtonState = medReading;
+  //Serial.println("\nreached lastMedButtonState");
+  //delay(200);
+} 
 
-  if ((millis() - lastEtDebounceTime > interButtonDelay) || (millis() - lastMedDebounceTime > interButtonDelay)){
+
+
+void setup() {
+  pinMode(etPin, INPUT);
+  pinMode(medPin, INPUT);
+  pinMode(solenoidPin, OUTPUT);
+
+  // set initial solenoid state
+  digitalWrite(solenoidPin, 0);
+  Serial.begin(9600);
+
+  
+}
+
+void loop() {
+  pollSwitches();
+
+  if (etBool && medBool && ((millis() - lastEtDebounceTime > interButtonDelay) || (millis() - lastMedDebounceTime > interButtonDelay))){
+    unsigned long timer2 = millis();
+    Serial.print("\nreached pomodoro1");
+    fireSolenoid();
+    while (millis() - timer2 < 500){}
+    Serial.print("\nreached pomodoro2");
+    fireSolenoid();
+    while (millis() - timer2 < 500){}
+    Serial.print("\nreached pomodoro3");
+    fireSolenoid();
     etBool = 0;
     medBool = 0;
-  }
-
-  if (etBool && medBool){
-    unsigned long timer2 = millis();
-    fireSolenoid();
-    while (millis() - timer2 < 255){}
-    fireSolenoid();
-    while (millis() - timer2 < 355){}
-    fireSolenoid();
     }
+  
+  if (etBool && (medBool == 0) && (millis() - lastEtDebounceTime > interButtonDelay)){
+    fireSolenoid();
+    etBool = 0;
+    }
+
+  if (medBool && (etBool == 0) && (millis() - lastMedDebounceTime > interButtonDelay)){
+    unsigned long timer3 = millis();
+    fireSolenoid();
+    while (millis() - timer3 < 500){}
+    fireSolenoid();
+    medBool = 0;
+    }  
+
 
 }
