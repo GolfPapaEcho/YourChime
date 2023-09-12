@@ -1,8 +1,8 @@
 //yourChime Arduino Sketch by Michael G. Hale 18.05.22 
 // constants won't change. They're used here to set pin numbers:
-const byte etPin = 2;        // the number of the egg/tea pin
-const byte medPin = 4;// the number of the meditation pin
-const byte solenoidPin = 13; // the number of the solenoid pin
+const byte etPin = 9;        // the number of the egg/tea pin
+const byte medPin = 10;// the number of the meditation pin
+const byte solenoidPin = 11; // the number of the solenoid pin
 
 // Variables will change:
 //int solenoidState = LOW;         // the current state of the output pin
@@ -18,6 +18,11 @@ unsigned long lastMedDebounceTime = 0; // the last time the output pin was toggs
 unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
 unsigned long interButtonDelay = 2000;
 unsigned long switchPollDelay = 125;
+unsigned long PomodoroWorkTime = 1200000;
+unsigned long PomodoroShortBreak = 300000;
+unsigned long PomodoroLongBreak = 1800000;
+unsigned long MettaBhavanaPeriod =300000;
+unsigned long Tea = 180000;
 byte etBool;
 byte medBool;
 int ms;
@@ -114,29 +119,46 @@ void loop() {
   pollSwitches();
 
   if (etBool && medBool && ((millis() - lastEtDebounceTime > interButtonDelay) || (millis() - lastMedDebounceTime > interButtonDelay))){
-    unsigned long timer2 = millis();
+    //unsigned long timer2 = millis();
     Serial.print("\nreached pomodoro1");
-    fireSolenoid();
-    while (millis() - timer2 < 500){}
-    Serial.print("\nreached pomodoro2");
-    fireSolenoid();
-    while (millis() - timer2 < 500){}
-    Serial.print("\nreached pomodoro3");
     fireSolenoid();
     etBool = 0;
     medBool = 0;
+    int i;
+    int j;
+    Serial.print("\nreached past set bools to zero");
+    for(j = 0; j++; j < 3){ 
+      for(i = 0; i++; i < 2){
+        delay(PomodoroWorkTime);
+    //while (millis() - timer2 < 500){}
+    //Serial.print("\nreached pomodoro2");
+        fireSolenoid();
+        delay(PomodoroShortBreak);
+    //while (millis() - timer2 < 500){}
+    //Serial.print("\nreached pomodoro3");
+        fireSolenoid();
+        }
+      if (j == 2){break;} //edge case not needed on last run as one work 6 hours a day!
+      delay(PomodoroLongBreak);
+      fireSolenoid();   
+      }
     }
   
   if (etBool && (medBool == 0) && (millis() - lastEtDebounceTime > interButtonDelay)){
     fireSolenoid();
     etBool = 0;
+    delay(Tea);
+    fireSolenoid();
     }
 
   if (medBool && (etBool == 0) && (millis() - lastMedDebounceTime > interButtonDelay)){
-    unsigned long timer3 = millis();
+    //unsigned long timer3 = millis();
+    int i;
     fireSolenoid();
-    while (millis() - timer3 < 500){}
-    fireSolenoid();
+    for(i = 0; i++; i < 6) {
+      delay(MettaBhavanaPeriod);
+      fireSolenoid();
+      }
     medBool = 0;
     }  
 
