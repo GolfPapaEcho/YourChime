@@ -9,7 +9,7 @@ const byte solenoidPin = 11; // the number of the solenoid pin
 byte etButtonState;                // the current etReading from the input pin
 byte medButtonState;               // current medReading 
 byte lastEtButtonState = 0;   // the previous etReading from the input pin
-byte lastMedButtonState = 1;  //previous medRading
+byte lastMedButtonState = 0;  //previous medRading
  
 // the following variables are unsigned longs because the time, measured in
 // milliseconds, will quickly become a bigger number than can be stored in an int.
@@ -128,39 +128,49 @@ void loop() {
     int j;
     Serial.print("\nreached past set bools to zero");
     for(j = 0; j++; j < 3){ 
+      Serial.print("\nEntered Pomodoro outer loop");
       for(i = 0; i++; i < 2){
-        delay(PomodoroWorkTime);
+        Serial.print("\nEntered Pomodoro inner loop");
+        Serial.print("\nPomodoro Work Time");
+        //delay(PomodoroWorkTime);  commented out for rapid testing with serial output
     //while (millis() - timer2 < 500){}
     //Serial.print("\nreached pomodoro2");
         fireSolenoid();
-        delay(PomodoroShortBreak);
+        Serial.print("\nPomodoro Short Break");
+        //delay(PomodoroShortBreak);
     //while (millis() - timer2 < 500){}
     //Serial.print("\nreached pomodoro3");
         fireSolenoid();
         }
-      if (j == 2){break;} //edge case not needed on last run as one work 6 hours a day!
-      delay(PomodoroLongBreak);
+      if (j == 2){break;} //edge case not needed on last run as one works 6 hours a day!
+      Serial.print("\nPomodoro Long Break");
+      //delay(PomodoroLongBreak);
       fireSolenoid();   
       }
     }
   
   if (etBool && (medBool == 0) && (millis() - lastEtDebounceTime > interButtonDelay)){
+    Serial.print("\nEntered Tea");
     fireSolenoid();
     etBool = 0;
     delay(Tea);
     fireSolenoid();
+    Serial.print("\nLeaving Tea");
     }
 
   if (medBool && (etBool == 0) && (millis() - lastMedDebounceTime > interButtonDelay)){
     //unsigned long timer3 = millis();
-    int i;
+    Serial.print("\nEntered Metta Bhavana");
+    int k;
     fireSolenoid();
-    for(i = 0; i++; i < 6) {
-      delay(MettaBhavanaPeriod);
+    for (k = 0; k++; k < 6) {
+      Serial.print("\nIn Metta Bhavana loop cycle \i");
+      //delay(MettaBhavanaPeriod);
       fireSolenoid();
       }
     medBool = 0;
+    Serial.print("\nLeaving Metta Bhavana");
     }  
-
+//Serial.print("\nWaiting for input");
 
 }
