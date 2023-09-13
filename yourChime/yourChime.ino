@@ -119,7 +119,7 @@ void loop() {
   pollSwitches();
 
   if (etBool && medBool && ((millis() - lastEtDebounceTime > interButtonDelay) || (millis() - lastMedDebounceTime > interButtonDelay))){
-    //unsigned long timer2 = millis();
+    //pomodoro day business logic
     Serial.print("\nreached pomodoro1");
     fireSolenoid();
     etBool = 0;
@@ -127,24 +127,26 @@ void loop() {
     int i;
     int j;
     Serial.print("\nreached past set bools to zero");
-    for(j = 0; j++; j < 3){ 
-      Serial.print("\nEntered Pomodoro outer loop");
-      for(i = 0; i++; i < 2){
+    for(j = 0; j < 3; j++){ 
+      Serial.print("\nEntered Pomodoro outer loop ");
+      Serial.print(j);
+      for(i = 0; i < 4; i++){
         Serial.print("\nEntered Pomodoro inner loop");
-        Serial.print("\nPomodoro Work Time");
-        //delay(PomodoroWorkTime);  commented out for rapid testing with serial output
+        Serial.print("\nPomodoro Work Time ");
+        Serial.print(i);
+        delay(PomodoroWorkTime);  //commented out delays for rapid testing with serial output
     //while (millis() - timer2 < 500){}
     //Serial.print("\nreached pomodoro2");
         fireSolenoid();
         Serial.print("\nPomodoro Short Break");
-        //delay(PomodoroShortBreak);
+        delay(PomodoroShortBreak);
     //while (millis() - timer2 < 500){}
     //Serial.print("\nreached pomodoro3");
         fireSolenoid();
         }
       if (j == 2){break;} //edge case not needed on last run as one works 6 hours a day!
       Serial.print("\nPomodoro Long Break");
-      //delay(PomodoroLongBreak);
+      delay(PomodoroLongBreak);
       fireSolenoid();   
       }
     }
@@ -163,9 +165,10 @@ void loop() {
     Serial.print("\nEntered Metta Bhavana");
     int k;
     fireSolenoid();
-    for (k = 0; k++; k < 6) {
-      Serial.print("\nIn Metta Bhavana loop cycle \i");
-      //delay(MettaBhavanaPeriod);
+    for (k = 0; k < 6; k++) {
+      Serial.print("\nIn Metta Bhavana loop cycle ");
+      Serial.print(k);
+      delay(MettaBhavanaPeriod);
       fireSolenoid();
       }
     medBool = 0;
