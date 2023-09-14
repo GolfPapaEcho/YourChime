@@ -18,11 +18,13 @@ unsigned long lastMedDebounceTime = 0; // the last time the output pin was toggs
 unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
 unsigned long interButtonDelay = 2000;
 unsigned long switchPollDelay = 125;
-unsigned long PomodoroWorkTime = 1200000;
-unsigned long PomodoroShortBreak = 300000;
-unsigned long PomodoroLongBreak = 1800000;
-unsigned long MettaBhavanaPeriod =300000;
-unsigned long Tea = 180000;
+unsigned long pomodoroWorkTime = 1200000;
+unsigned long pomodoroShortBreak = 300000;
+unsigned long pomodoroLongBreak = 1800000;
+unsigned long mettaBhavanaPeriod =300000;
+unsigned long tea = 180000;
+unsigned long startWaitingTime;
+unsigned long startTimeChime  = 0;
 byte etBool;
 byte medBool;
 int ms;
@@ -134,41 +136,43 @@ void loop() {
         Serial.print("\nEntered Pomodoro inner loop");
         Serial.print("\nPomodoro Work Time ");
         Serial.print(i);
-        delay(PomodoroWorkTime);  //commented out delays for rapid testing with serial output
+        delay(pomodoroWorkTime);  //commented out delays for rapid testing with serial output
     //while (millis() - timer2 < 500){}
     //Serial.print("\nreached pomodoro2");
         fireSolenoid();
         Serial.print("\nPomodoro Short Break");
-        delay(PomodoroShortBreak);
+        delay(pomodoroShortBreak);
     //while (millis() - timer2 < 500){}
     //Serial.print("\nreached pomodoro3");
         fireSolenoid();
         }
       if (j == 2){break;} //edge case not needed on last run as one works 6 hours a day!
       Serial.print("\nPomodoro Long Break");
-      delay(PomodoroLongBreak);
+      delay(pomodoroLongBreak);
       fireSolenoid();   
       }
     }
   
-  if (etBool && (medBool == 0) && (millis() - lastEtDebounceTime > interButtonDelay)){
-    Serial.print("\nEntered Tea");
-    fireSolenoid();
-    etBool = 0;
-    delay(Tea);
-    fireSolenoid();
-    Serial.print("\nLeaving Tea");
+  if (etBool && (medBool == 0) && (millis() - lastEtDebounceTime > interButtonDelay)){    
+    Serial.print("\nEntered tea");
+    if (startTimeChime == 0){startTimeChime = millis();}
+    if (millis() - startTimeChime < 200){fireSolenoid();}
+    if (millis() - startWaitingTime > tea){
+      fireSolenoid();
+      etBool = 0;
+      startTimeChime = 0;
+      Serial.print("\nLeaving tea");
+      }
     }
 
   if (medBool && (etBool == 0) && (millis() - lastMedDebounceTime > interButtonDelay)){
-    //unsigned long timer3 = millis();
     Serial.print("\nEntered Metta Bhavana");
     int k;
     fireSolenoid();
     for (k = 0; k < 6; k++) {
       Serial.print("\nIn Metta Bhavana loop cycle ");
       Serial.print(k);
-      delay(MettaBhavanaPeriod);
+      delay(mettaBhavanaPeriod);
       fireSolenoid();
       }
     medBool = 0;
