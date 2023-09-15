@@ -25,11 +25,18 @@ unsigned long mettaBhavanaPeriod =300000;
 unsigned long tea = 180000;
 unsigned long startWaitingTime;
 unsigned long startTimeChime  = 0;
+//switch bools
 byte etBool;
 byte medBool;
+//state bools
+byte inTea;
+byte inMettaBhavana;
+byte inPomodoro;
 int ms;
-//byte *eB;
-//byte *mB;
+//vars for loops (i&j in pomodoro and k in Metta Bhavana)
+int i;
+int j;
+int k;
 
 byte etReading;
 byte medReading;
@@ -125,10 +132,7 @@ void loop() {
     Serial.print("\nreached pomodoro1");
     fireSolenoid();
     etBool = 0;
-    medBool = 0;
-    int i;
-    int j;
-    Serial.print("\nreached past set bools to zero");
+    medBool = 0;//these go in exit code
     for(j = 0; j < 3; j++){ 
       Serial.print("\nEntered Pomodoro outer loop ");
       Serial.print(j);
@@ -153,8 +157,9 @@ void loop() {
       }
     }
   
-  if (etBool && (medBool == 0) && (millis() - lastEtDebounceTime > interButtonDelay)){    
+  if (etBool && (medBool == 0) && (millis() - lastEtDebounceTime > interButtonDelay){    
     Serial.print("\nEntered tea");
+    inTea = 1;
     if (startTimeChime == 0){startTimeChime = millis();}
     if (millis() - startTimeChime < 200){fireSolenoid();}
     if (millis() - startWaitingTime > tea){
@@ -162,21 +167,33 @@ void loop() {
       etBool = 0;
       startTimeChime = 0;
       Serial.print("\nLeaving tea");
+      inTea = 0;
       }
     }
 
   if (medBool && (etBool == 0) && (millis() - lastMedDebounceTime > interButtonDelay)){
     Serial.print("\nEntered Metta Bhavana");
-    int k;
-    fireSolenoid();
-    for (k = 0; k < 6; k++) {
-      Serial.print("\nIn Metta Bhavana loop cycle ");
-      Serial.print(k);
-      delay(mettaBhavanaPeriod);
+    inMettaBhavana = 1;
+    if (startTimeChime == 0){startTimeChime = millis();}
+    if (millis() - startTimeChime < 200){fireSolenoid();}
+    
+
+    Serial.print("\nIn Metta Bhavana loop cycle ");
+    Serial.print(k);
+    if ((millis() - startWaitingTime > mettaBhavanaPeriod) && (k < 6)) {
       fireSolenoid();
-      }
-    medBool = 0;
-    Serial.print("\nLeaving Metta Bhavana");
+      Serial.print("\nFired solenoid on round ");
+      Serial.print(k);
+      k++;
+      startWaitingTime = millis();
+    }
+    if (k >= 6){
+      medBool = 0;
+      startTimeChime = 0;
+      Serial.print("\nLeaving Metta Bhavana");
+    }
+    
+    
     }  
 //Serial.print("\nWaiting for input");
 
