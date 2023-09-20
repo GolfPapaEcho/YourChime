@@ -11,8 +11,7 @@ byte lastButtonState = 0;  // the previous buttonReading from the input pin
 
 // the following variables are unsigned longs because the time, measured in
 // milliseconds, will quickly become a bigger number than can be stored in an int.
-unsigned long lastButtonDebounceTime = 0;
-unsigned long lastMedDebounceTime = 0;  // the last time the output pin was toggsolenoid
+unsigned long lastButtonDebounceTime = 0;// the last time the output pin was toggsolenoid
 unsigned long debounceDelay = 50;       // the debounce time; increase if the output flickers
 unsigned long stateCheckTime;
 unsigned short etButtonDelay = 2000;
@@ -82,9 +81,7 @@ void pollSwitches() {
         if (millis() - stateCheckTime > mettaBhavanaButtonDelay) {
           stateChar = 'm';
         }
-        if (millis() - stateCheckTime > pomodoroButtonDelay) {
-          stateChar = 'p';
-        }
+        
         //Serial.print("\netBool=1");
         //delay(200);
       }
@@ -112,34 +109,6 @@ void loop() {
   pollSwitches();
 
   switch (stateChar) {
-
-    case 'p':
-      //pomodoro day business logic
-      Serial.print("\nreached pomodoro1");
-      fireSolenoid();
-      for (j = 0; j < 3; j++) {
-        Serial.print("\nEntered Pomodoro outer loop ");
-        Serial.print(j);
-        for (i = 0; i < 4; i++) {
-          Serial.print("\nEntered Pomodoro inner loop");
-          Serial.print("\nPomodoro Work Time ");
-          Serial.print(i);
-          delay(pomodoroWorkTime);  //commented out delays for rapid testing with serial output
-                                    //while (millis() - timer2 < 500){}
-                                    //Serial.print("\nreached pomodoro2");
-          fireSolenoid();
-          Serial.print("\nPomodoro Short Break");
-          delay(pomodoroShortBreak);
-          //while (millis() - timer2 < 500){}
-          //Serial.print("\nreached pomodoro3");
-          fireSolenoid();
-        }
-        if (j == 2) { break; }  //edge case not needed on last run as one works 6 hours a day!
-        Serial.print("\nPomodoro Long Break");
-        delay(pomodoroLongBreak);
-        fireSolenoid();
-      }
-      break;
   
   
   case 'e':
@@ -179,5 +148,33 @@ void loop() {
 
 
   break;
-  }  
+  
+  default:
+      //pomodoro day business logic
+      Serial.print("\nreached pomodoro1");
+      fireSolenoid();
+      for (j = 0; j < 3; j++) {
+        Serial.print("\nEntered Pomodoro outer loop ");
+        Serial.print(j);
+        for (i = 0; i < 4; i++) {
+          Serial.print("\nEntered Pomodoro inner loop");
+          Serial.print("\nPomodoro Work Time ");
+          Serial.print(i);
+          delay(pomodoroWorkTime);  //commented out delays for rapid testing with serial output
+                                    //while (millis() - timer2 < 500){}
+                                    //Serial.print("\nreached pomodoro2");
+          fireSolenoid();
+          Serial.print("\nPomodoro Short Break");
+          delay(pomodoroShortBreak);
+          //while (millis() - timer2 < 500){}
+          //Serial.print("\nreached pomodoro3");
+          fireSolenoid();
+        }
+        if (j == 2) { break; }  //edge case not needed on last run as one works 6 hours a day!
+        Serial.print("\nPomodoro Long Break");
+        delay(pomodoroLongBreak);
+        fireSolenoid();
+      }
+  break;
+  } 
 }
