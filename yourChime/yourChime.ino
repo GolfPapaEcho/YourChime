@@ -8,7 +8,7 @@ const byte solenoidPin = 11;  // the number of the solenoid pin
 byte buttonState;          // the current buttonReading from the input pin
 byte lastButtonState = 0;  // the previous buttonReading from the input pin
 
-
+byte stateNumber = 0;  //holds number of button presses(0...2)
 // the following variables are unsigned longs because the time, measured in
 // milliseconds, will quickly become a bigger number than can be stored in an int.
 unsigned long lastButtonDebounceTime = 0;  // the last time the output pin was toggsolenoid
@@ -78,18 +78,15 @@ void pollSwitches() {
       // select state from button push time
       if (buttonState == 1) {
         Serial.print("\nbutton state = 1");
-        if (millis() - lastButtonDebounceTime > etButtonDelay) {
-          stateChar = 'e';
-          Serial.print("got et");
-        }
-        if (millis() - lastButtonDebounceTime > mettaBhavanaButtonDelay) {
-          stateChar = 'm';
-          Serial.print("\ngot m");
-        }
-        if (millis() - lastButtonDebounceTime > pomodoroButtonDelay) {
-          stateChar = 'p';
-          Serial.print("\ngot p");
-        }  //Serial.print("\netBool=1");
+        stateNumber = 0;
+        Serial.print("got et");
+        
+        stateChar = 'm';
+        Serial.print("\ngot m");
+        
+        stateChar = 'p';
+        Serial.print("\ngot p");
+        //Serial.print("\netBool=1");
         //delay(200);
       }
     }
