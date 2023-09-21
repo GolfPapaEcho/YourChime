@@ -68,29 +68,33 @@ void pollSwitches() {
   if ((millis() - lastButtonDebounceTime) > debounceDelay) {
     // whatever the buttonReading is at, it's been there for longer than the debounce
     // delay, so take it as the actual current state:
+    Serial.print("\nButton debounced");
 
     // if the button state has changed:
     if (buttonReading != buttonState) {
+      Serial.print("\nReached second button reading not equal to buttonState");
       buttonState = buttonReading;
       stateCheckTime = millis();
       // select state from button push time
       if (buttonState == 1) {
-        if (millis() - stateCheckTime > etButtonDelay) {
+        Serial.print("\nbutton state = 1");
+        if (millis() - lastButtonDebounceTime > etButtonDelay) {
           stateChar = 'e';
           Serial.print("got et");
         }
-        if (millis() - stateCheckTime > mettaBhavanaButtonDelay) {
+        if (millis() - lastButtonDebounceTime > mettaBhavanaButtonDelay) {
           stateChar = 'm';
+          Serial.print("\ngot m");
         }
-        if (millis() - stateCheckTime > pomodoroButtonDelay) {
+        if (millis() - lastButtonDebounceTime > pomodoroButtonDelay) {
           stateChar = 'p';
+          Serial.print("\ngot p");
         }  //Serial.print("\netBool=1");
         //delay(200);
       }
     }
   }
-  // save the Reading. Next time through the loop, it'll be the lastButtonState
-  lastButtonState = buttonReading;
+ 
 }
 // save the Reading. Next time through the loop, it'll be the lastEt/MedButtonState:
 //Serial.println("\nreached lastbuttonState");
@@ -180,4 +184,7 @@ void loop() {
       }
       break;
   }
+ // save the Reading. Next time through the loop, it'll be the lastButtonState
+  lastButtonState = buttonReading;
+
 }
