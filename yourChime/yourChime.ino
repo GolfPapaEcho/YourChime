@@ -11,8 +11,8 @@ byte lastButtonState = 0;  // the previous buttonReading from the input pin
 
 // the following variables are unsigned longs because the time, measured in
 // milliseconds, will quickly become a bigger number than can be stored in an int.
-unsigned long lastButtonDebounceTime = 0;// the last time the output pin was toggsolenoid
-unsigned long debounceDelay = 50;       // the debounce time; increase if the output flickers
+unsigned long lastButtonDebounceTime = 0;  // the last time the output pin was toggsolenoid
+unsigned long debounceDelay = 50;          // the debounce time; increase if the output flickers
 unsigned long stateCheckTime;
 unsigned short etButtonDelay = 2000;
 unsigned short mettaBhavanaButtonDelay = 4000;
@@ -56,11 +56,12 @@ void pollSwitches() {
   // check to see if you just pressed a button
   // (i.e. the input went from LOW to HIGH), and you've waited long enough
   // since the last press to ignore any noise:
-
+  Serial.print(buttonReading);
   // If the switch changed, due to noise or pressing:
   if (buttonReading != lastButtonState) {
     // reset the debouncing timer
     lastButtonDebounceTime = millis();
+    Serial.print("\nbutton pressed or noise");
   }
 
 
@@ -71,18 +72,19 @@ void pollSwitches() {
     // if the button state has changed:
     if (buttonReading != buttonState) {
       buttonState = buttonReading;
-
+      stateCheckTime = millis();
       // select state from button push time
       if (buttonState == 1) {
-        stateCheckTime = millis();
         if (millis() - stateCheckTime > etButtonDelay) {
           stateChar = 'e';
+          Serial.print("got et");
         }
         if (millis() - stateCheckTime > mettaBhavanaButtonDelay) {
           stateChar = 'm';
         }
-        
-        //Serial.print("\netBool=1");
+        if (millis() - stateCheckTime > pomodoroButtonDelay) {
+          stateChar = 'p';
+        }  //Serial.print("\netBool=1");
         //delay(200);
       }
     }
@@ -107,49 +109,50 @@ void setup() {
 
 void loop() {
   pollSwitches();
-
+  Serial.print("\n");
+  Serial.print(stateChar);
   switch (stateChar) {
-  
-  
-  case 'e':
-
-    Serial.print("\nEntered tea");
-    inTea = 1;
-    if (startTimeChime == 0) { startTimeChime = millis(); }   
-    if (millis() - startTimeChime < 200) { fireSolenoid(); }
-    if (millis() - startWaitingTime > tea) {
-      fireSolenoid();
-      startTimeChime = 0;
-      Serial.print("\nLeaving tea");
-      inTea = 0;
-    }
-    break;
-
-  case 'm':
-    Serial.print("\nEntered Metta Bhavana");
-    inMettaBhavana = 1;
-    if (startTimeChime == 0) { startTimeChime = millis(); }
-    if (millis() - startTimeChime < 200) { fireSolenoid(); }
 
 
-    Serial.print("\nIn Metta Bhavana loop cycle ");
-    Serial.print(k);
-    if ((millis() - startWaitingTime > mettaBhavanaPeriod) && (k < 6)) {
-      fireSolenoid();
-      Serial.print("\nFired solenoid on round ");
+    case 'e':
+
+      Serial.print("\nEntered tea");
+      inTea = 1;
+      if (startTimeChime == 0) { startTimeChime = millis(); }
+      if (millis() - startTimeChime < 200) { fireSolenoid(); }
+      if (millis() - startWaitingTime > tea) {
+        fireSolenoid();
+        startTimeChime = 0;
+        Serial.print("\nLeaving tea");
+        inTea = 0;
+      }
+      break;
+
+    case 'm':
+      Serial.print("\nEntered Metta Bhavana");
+      inMettaBhavana = 1;
+      if (startTimeChime == 0) { startTimeChime = millis(); }
+      if (millis() - startTimeChime < 200) { fireSolenoid(); }
+
+
+      Serial.print("\nIn Metta Bhavana loop cycle ");
       Serial.print(k);
-      k++;
-      startWaitingTime = millis();
-    }
-    if (k >= 6) {
-      startTimeChime = 0;
-      Serial.print("\nLeaving Metta Bhavana");
-    }
+      if ((millis() - startWaitingTime > mettaBhavanaPeriod) && (k < 6)) {
+        fireSolenoid();
+        Serial.print("\nFired solenoid on round ");
+        Serial.print(k);
+        k++;
+        startWaitingTime = millis();
+      }
+      if (k >= 6) {
+        startTimeChime = 0;
+        Serial.print("\nLeaving Metta Bhavana");
+      }
 
 
-  break;
-  
-  default:
+      break;
+
+    case 'p':
       //pomodoro day business logic
       Serial.print("\nreached pomodoro1");
       fireSolenoid();
@@ -175,6 +178,6 @@ void loop() {
         delay(pomodoroLongBreak);
         fireSolenoid();
       }
-  break;
-  } 
+      break;
+  }
 }
