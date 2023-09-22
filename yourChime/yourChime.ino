@@ -8,7 +8,7 @@ const byte solenoidPin = 11;  // the number of the solenoid pin
 byte buttonState;          // the current buttonReading from the input pin
 byte lastButtonState = 0;  // the previous buttonReading from the input pin
 
-byte stateNumber = 0;  //holds number of button presses(0...2)
+byte stateNumber;  //holds number of button presses(0...2)
 // the following variables are unsigned longs because the time, measured in
 // milliseconds, will quickly become a bigger number than can be stored in an int.
 unsigned long lastButtonDebounceTime = 0;  // the last time the output pin was toggsolenoid
@@ -25,8 +25,7 @@ unsigned long mettaBhavanaPeriod = 300000;
 unsigned long tea = 180000;
 unsigned long startWaitingTime;
 unsigned long startTimeChime = 0;
-//switch char
-char stateChar;
+
 //state bools
 byte inTea;
 byte inMettaBhavana;
@@ -77,22 +76,15 @@ void pollSwitches() {
       stateCheckTime = millis();
       // select state from button push time
       if (buttonState == 1) {
-        Serial.print("\nbutton state = 1");
-        stateNumber = 0;
-        Serial.print("got et");
-        
-        stateChar = 'm';
-        Serial.print("\ngot m");
-        
-        stateChar = 'p';
-        Serial.print("\ngot p");
-        //Serial.print("\netBool=1");
-        //delay(200);
-      }
+        //do nothing here as we want to dectect falling edge
+      } else {
+        stateNumber++;
+        if (stateNumber > 3) {stateNumber = 0;}
+        }
     }
   }
- 
 }
+
 // save the Reading. Next time through the loop, it'll be the lastEt/MedButtonState:
 //Serial.println("\nreached lastbuttonState");
 //delay(200);
@@ -111,11 +103,11 @@ void setup() {
 void loop() {
   pollSwitches();
   Serial.print("\n");
-  Serial.print(stateChar);
-  switch (stateChar) {
+  Serial.print(stateNumber);
+  switch (stateNumber) {
 
 
-    case 'e':
+    case 1:
 
       Serial.print("\nEntered tea");
       inTea = 1;
@@ -129,7 +121,7 @@ void loop() {
       }
       break;
 
-    case 'm':
+    case 2:
       Serial.print("\nEntered Metta Bhavana");
       inMettaBhavana = 1;
       if (startTimeChime == 0) { startTimeChime = millis(); }
@@ -153,7 +145,7 @@ void loop() {
 
       break;
 
-    case 'p':
+    case 3:
       //pomodoro day business logic
       Serial.print("\nreached pomodoro1");
       fireSolenoid();
@@ -181,7 +173,6 @@ void loop() {
       }
       break;
   }
- // save the Reading. Next time through the loop, it'll be the lastButtonState
+  // save the Reading. Next time through the loop, it'll be the lastButtonState
   lastButtonState = buttonReading;
-
 }
