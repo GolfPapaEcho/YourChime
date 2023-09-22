@@ -64,7 +64,7 @@ void pollSwitches() {
   // check to see if you just pressed a button
   // (i.e. the input went from LOW to HIGH), and you've waited long enough
   // since the last press to ignore any noise:
-  Serial.print(buttonReading);
+  //Serial.print(buttonReading);
   // If the switch changed, due to noise or pressing:
   if (buttonReading != lastButtonState) {
     // reset the debouncing timer
@@ -76,11 +76,10 @@ void pollSwitches() {
   if ((millis() - lastButtonDebounceTime) > debounceDelay) {
     // whatever the buttonReading is at, it's been there for longer than the debounce
     // delay, so take it as the actual current state:
-    Serial.print("\nButton debounced");
+    //Serial.print("\nButton debounced");
 
     // if the button state has changed:
     if (buttonReading != buttonState) {
-      Serial.print("\nReached second button reading not equal to buttonState");
       buttonState = buttonReading;
       stateCheckTime = millis();
       // select state from button push time
@@ -138,11 +137,9 @@ void loop() {
 
     case 2:
       Serial.print("\nEntered Metta Bhavana");
-      inMettaBhavana = 1;
       if (startTimeChime == 0) { startTimeChime = millis(); }
       if (millis() - startTimeChime < 200) { fireSolenoid(); }
-
-
+      if (inMettaBhavana == 0){flashLight(); inMettaBhavana = 1;}
       Serial.print("\nIn Metta Bhavana loop cycle ");
       Serial.print(k);
       if ((millis() - startWaitingTime > mettaBhavanaPeriod) && (k < 6)) {
@@ -152,18 +149,22 @@ void loop() {
         k++;
         startWaitingTime = millis();
       }
-      if (k >= 6) {
+      if (k > 5) {
         startTimeChime = 0;
+        startWaitingTime = 0;
+        stateNumber = 0;
+        inMettaBhavana = 0;
         Serial.print("\nLeaving Metta Bhavana");
       }
-
-
       break;
 
     case 3:
       //pomodoro day business logic
       Serial.print("\nreached pomodoro1");
-      fireSolenoid();
+      if (startTimeChime == 0) { startTimeChime = millis(); }
+      if (millis() - startTimeChime < 200) { fireSolenoid(); }
+      if (inPomodoro == 0){flashLight(); inPomodoro = 1;}
+
       for (j = 0; j < 3; j++) {
         Serial.print("\nEntered Pomodoro outer loop ");
         Serial.print(j);
