@@ -2,13 +2,13 @@
 // constants won't change. They're used here to set pin numbers:
 const byte buttonPin = 9;     // the number of the egg/tea pin
 const byte solenoidPin = 11;  // the number of the solenoid pin
-
+//byte LEDPin = 13;
 // Variables will change:
 //int solenoidState = LOW;         // the current state of the output pin
 byte buttonState;          // the current buttonReading from the input pin
 byte lastButtonState = 0;  // the previous buttonReading from the input pin
 
-byte stateNumber;  //holds number of button presses(0...2)
+byte stateNumber;  //holds number of button presses(0...3)
 // the following variables are unsigned longs because the time, measured in
 // milliseconds, will quickly become a bigger number than can be stored in an int.
 unsigned long lastButtonDebounceTime = 0;  // the last time the output pin was toggsolenoid
@@ -36,6 +36,7 @@ int i;
 int j;
 int k;
 
+
 byte buttonReading;
 
 
@@ -46,6 +47,14 @@ int fireSolenoid() {
   while (millis() - timer1 < 200) {}
   digitalWrite(solenoidPin, LOW);
   Serial.print("\nFired Solenoid");
+}
+void flashLight(){
+  for (int l = 0; l < stateNumber; l++){
+    digitalWrite(LED_BUILTIN, 1);
+    delay(500);
+    digitalWrite(LED_BUILTIN, 0);
+    delay(500);
+  }
 }
 
 void pollSwitches() {
@@ -80,6 +89,8 @@ void pollSwitches() {
       } else {
         stateNumber++;
         if (stateNumber > 3) {stateNumber = 0;}
+        startTimeChime = 0;
+        startWaitingTime = millis();
         }
     }
   }
@@ -94,6 +105,7 @@ void pollSwitches() {
 void setup() {
   pinMode(buttonPin, INPUT);
   pinMode(solenoidPin, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
 
   // set initial solenoid state
   digitalWrite(solenoidPin, 0);
@@ -110,12 +122,15 @@ void loop() {
     case 1:
 
       Serial.print("\nEntered tea");
-      inTea = 1;
       if (startTimeChime == 0) { startTimeChime = millis(); }
       if (millis() - startTimeChime < 200) { fireSolenoid(); }
+      if (inTea == 0){flashLight(); inTea = 1;}
       if (millis() - startWaitingTime > tea) {
         fireSolenoid();
+        flashLight();
         startTimeChime = 0;
+        startWaitingTime = 0;
+        stateNumber = 0;
         Serial.print("\nLeaving tea");
         inTea = 0;
       }
