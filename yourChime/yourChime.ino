@@ -18,10 +18,9 @@ unsigned short etButtonDelay = 2000;
 unsigned short mettaBhavanaButtonDelay = 4000;
 unsigned short pomodoroButtonDelay = 6000;
 unsigned long switchPollDelay = 125;
-unsigned long pomodoroWorkTime = 1200000;
-unsigned long pomodoroShortBreak = 300000;
-unsigned long pomodoroLongBreak = 1800000;
-unsigned long mettaBhavanaPeriod = 300000;
+unsigned long pomodoroWorkTime = 20000;//for testing set to 20000 for production set to 1200000;
+unsigned long pomodoroLongBreak = 30000;//for testing set to 30000 sec for production set to 1800000;
+unsigned long mettaBhavanaPeriod = 5000;// for testing set to 5000 for production set to 300000; //used for both Metta Bhavana and pomodoroShortBreak
 unsigned long tea = 180000;
 unsigned long startWaitingTime;
 unsigned long startTimeChime = 0;
@@ -30,11 +29,12 @@ unsigned long startTimeChime = 0;
 byte inTea;
 byte inMettaBhavana;
 byte inPomodoro;
+byte waitType; //0 for pomodoroWorkTime 1 short break 2 long break
 int ms;
 //vars for loops (i&j in pomodoro and k in Metta Bhavana)
-int i;
-int j;
-int k;
+int i = 0;
+int j = 0;
+int k = 0;
 
 
 byte buttonReading;
@@ -89,6 +89,9 @@ void pollSwitches() {
         stateNumber++;
         if (stateNumber > 3) {stateNumber = 0;}
         startTimeChime = 0;
+        inTea = 0;
+        inMettaBhavana = 0;
+        inPomodoro = 0;
         startWaitingTime = millis();
         }
     }
@@ -132,6 +135,8 @@ void loop() {
         stateNumber = 0;
         Serial.print("\nLeaving tea");
         inTea = 0;
+        inMettaBhavana = 0;
+        inPomodoro = 0;
       }
       break;
 
@@ -139,7 +144,7 @@ void loop() {
       Serial.print("\nEntered Metta Bhavana");
       if (startTimeChime == 0) { startTimeChime = millis(); }
       if (millis() - startTimeChime < 200) { fireSolenoid(); }
-      if (inMettaBhavana == 0){flashLight(); inMettaBhavana = 1;}
+      if (inMettaBhavana == 0){flashLight(); inMettaBhavana = 1; }
       Serial.print("\nIn Metta Bhavana loop cycle ");
       Serial.print(k);
       if ((millis() - startWaitingTime > mettaBhavanaPeriod) && (k < 6)) {
@@ -149,7 +154,7 @@ void loop() {
         k++;
         startWaitingTime = millis();
       }
-      if (k > 5) {
+      if (k > 6) {
         startTimeChime = 0;
         startWaitingTime = 0;
         stateNumber = 0;
@@ -163,30 +168,72 @@ void loop() {
       Serial.print("\nreached pomodoro1");
       if (startTimeChime == 0) { startTimeChime = millis(); }
       if (millis() - startTimeChime < 200) { fireSolenoid(); }
-      if (inPomodoro == 0){flashLight(); inPomodoro = 1;}
-
-      for (j = 0; j < 3; j++) {
-        Serial.print("\nEntered Pomodoro outer loop ");
-        Serial.print(j);
-        for (i = 0; i < 4; i++) {
-          Serial.print("\nEntered Pomodoro inner loop");
+      if (inPomodoro == 0){flashLight(); i = 0; waitType = 0; inPomodoro = 1;}
+      switch (waitType){
+        case 0:
           Serial.print("\nPomodoro Work Time ");
-          Serial.print(i);
-          delay(pomodoroWorkTime);  //commented out delays for rapid testing with serial output
-                                    //while (millis() - timer2 < 500){}
-                                    //Serial.print("\nreached pomodoro2");
-          fireSolenoid();
+          Serial.print(waitType);
+          if (millis() - startWaitingTime > pomodoroWorkTime){
+            fireSolenoid();
+            waitType = 1;
+            startWaitingTime = millis();
+          }
+        break;
+        
+        case 1:
           Serial.print("\nPomodoro Short Break");
-          delay(pomodoroShortBreak);
+          if(millis() - startWaitingTime > mettaBhavanaPeriod){
+            fireSolenoid();
+            if(i < 4){
+              waitType = 0;
+              i++;
+              startWaitingTime = millis();
+              }
+            else if(j <= 2){
+                i = 0;
+                j++;
+                waitType = 2;
+                startWaitingTime = millis();
+            }
+            else{
+              //set tea time chime to finish days work
+              
+              if(millis() - startWaitingTime > tea){
+                fireSolenoid();
+              inPomodoro = 0; 
+              stateNumber = 0;
+              startTimeChime = 0;
+              startWaitingTime = 0;
+            }
+          }        
+        break;
+        
+        case 2:  
+              Serial.print("\nPomodoro Long Break");
+              if(millis() - startWaitingTime > pomodoroLongBreak){
+                fireSolenoid();
+                j++;
+                if(j <= 2){
+                  waitType = 0;
+                  startWaitingTime = millis();
+                }
+               
+            }
+          break;  
+          //delay(pomodoroShortBreak);
           //while (millis() - timer2 < 500){}
           //Serial.print("\nreached pomodoro3");
-          fireSolenoid();
-        }
-        if (j == 2) { break; }  //edge case not needed on last run as one works 6 hours a day!
-        Serial.print("\nPomodoro Long Break");
-        delay(pomodoroLongBreak);
-        fireSolenoid();
-      }
+          }
+          } 
+          
+        
+        //if (j == 2) { break; }  //edge case not needed on last run as one works 6 hours a day!
+        
+        //delay(pomodoroLongBreak);
+       // fireSolenoid();
+      //inTea = 0;
+      //inMettaBhavana = 0;
+      //inPomodoro = 0
       break;
   }
   // save the Reading. Next time through the loop, it'll be the lastButtonState
