@@ -18,10 +18,10 @@ unsigned short etButtonDelay = 2000;
 unsigned short mettaBhavanaButtonDelay = 4000;
 unsigned short pomodoroButtonDelay = 6000;
 unsigned long switchPollDelay = 125;
-unsigned long pomodoroWorkTime = 20000;   //for testing set to 20000 for production set to 1200000;
-unsigned long pomodoroLongBreak = 30000;  //for testing set to 30000 sec for production set to 1800000;
-unsigned long mettaBhavanaPeriod = 5000;  // for testing set to 5000 for production set to 300000; //used for both Metta Bhavana and pomodoroShortBreak
-unsigned long tea = 180000;
+unsigned long pomodoroWorkTime = 3000;   //for testing set to 3000 for production set to 1200000;
+unsigned long pomodoroLongBreak = 50000;  //for testing set to 5000 sec for production set to 1800000;
+unsigned long mettaBhavanaPeriod = 2000;  //for testing set to 2000 for production set to 300000; //used for both Metta Bhavana and pomodoroShortBreak
+unsigned long tea = 1800;               //for testing set to 1800 for production set to 180000
 unsigned long startWaitingTime;
 unsigned long startTimeChime = 0;
 
@@ -228,6 +228,7 @@ void loop() {
                   waitType = 0;
                   startWaitingTime = millis();
                 }
+                else{startWaitingTime = millis();}
               }
               break;
               //delay(pomodoroShortBreak);
