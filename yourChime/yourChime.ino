@@ -18,9 +18,9 @@ unsigned short etButtonDelay = 2000;
 unsigned short mettaBhavanaButtonDelay = 4000;
 unsigned short pomodoroButtonDelay = 6000;
 unsigned long switchPollDelay = 125;
-unsigned long pomodoroWorkTime = 20000;//for testing set to 20000 for production set to 1200000;
-unsigned long pomodoroLongBreak = 30000;//for testing set to 30000 sec for production set to 1800000;
-unsigned long mettaBhavanaPeriod = 5000;// for testing set to 5000 for production set to 300000; //used for both Metta Bhavana and pomodoroShortBreak
+unsigned long pomodoroWorkTime = 20000;   //for testing set to 20000 for production set to 1200000;
+unsigned long pomodoroLongBreak = 30000;  //for testing set to 30000 sec for production set to 1800000;
+unsigned long mettaBhavanaPeriod = 5000;  // for testing set to 5000 for production set to 300000; //used for both Metta Bhavana and pomodoroShortBreak
 unsigned long tea = 180000;
 unsigned long startWaitingTime;
 unsigned long startTimeChime = 0;
@@ -29,7 +29,7 @@ unsigned long startTimeChime = 0;
 byte inTea;
 byte inMettaBhavana;
 byte inPomodoro;
-byte waitType; //0 for pomodoroWorkTime 1 short break 2 long break
+byte waitType;  //0 for pomodoroWorkTime 1 short break 2 long break
 int ms;
 //vars for loops (i&j in pomodoro and k in Metta Bhavana)
 int i = 0;
@@ -48,8 +48,8 @@ int fireSolenoid() {
   digitalWrite(solenoidPin, LOW);
   Serial.print("\nFired Solenoid");
 }
-void flashLight(){
-  for (int l = 0; l < stateNumber; l++){
+void flashLight() {
+  for (int l = 0; l < stateNumber; l++) {
     digitalWrite(LED_BUILTIN, 1);
     delay(500);
     digitalWrite(LED_BUILTIN, 0);
@@ -87,13 +87,13 @@ void pollSwitches() {
         //do nothing here as we want to dectect falling edge
       } else {
         stateNumber++;
-        if (stateNumber > 3) {stateNumber = 0;}
+        if (stateNumber > 3) { stateNumber = 0; }
         startTimeChime = 0;
         inTea = 0;
         inMettaBhavana = 0;
         inPomodoro = 0;
         startWaitingTime = millis();
-        }
+      }
     }
   }
 }
@@ -126,7 +126,10 @@ void loop() {
       Serial.print("\nEntered tea");
       if (startTimeChime == 0) { startTimeChime = millis(); }
       if (millis() - startTimeChime < 200) { fireSolenoid(); }
-      if (inTea == 0){flashLight(); inTea = 1;}
+      if (inTea == 0) {
+        flashLight();
+        inTea = 1;
+      }
       if (millis() - startWaitingTime > tea) {
         fireSolenoid();
         flashLight();
@@ -144,7 +147,10 @@ void loop() {
       Serial.print("\nEntered Metta Bhavana");
       if (startTimeChime == 0) { startTimeChime = millis(); }
       if (millis() - startTimeChime < 200) { fireSolenoid(); }
-      if (inMettaBhavana == 0){flashLight(); inMettaBhavana = 1; }
+      if (inMettaBhavana == 0) {
+        flashLight();
+        inMettaBhavana = 1;
+      }
       Serial.print("\nIn Metta Bhavana loop cycle ");
       Serial.print(k);
       if ((millis() - startWaitingTime > mettaBhavanaPeriod) && (k < 6)) {
@@ -168,69 +174,73 @@ void loop() {
       Serial.print("\nreached pomodoro1");
       if (startTimeChime == 0) { startTimeChime = millis(); }
       if (millis() - startTimeChime < 200) { fireSolenoid(); }
-      if (inPomodoro == 0){flashLight(); i = 0; waitType = 0; inPomodoro = 1;}
-      switch (waitType){
+      if (inPomodoro == 0) {
+        flashLight();
+        i = 0;
+        waitType = 0;
+        inPomodoro = 1;
+      }
+      switch (waitType) {
         case 0:
           Serial.print("\nPomodoro Work Time ");
           Serial.print(waitType);
-          if (millis() - startWaitingTime > pomodoroWorkTime){
+          if (millis() - startWaitingTime > pomodoroWorkTime) {
             fireSolenoid();
             waitType = 1;
             startWaitingTime = millis();
           }
-        break;
-        
+          break;
+
         case 1:
           Serial.print("\nPomodoro Short Break");
-          if(millis() - startWaitingTime > mettaBhavanaPeriod){
+          if (millis() - startWaitingTime > mettaBhavanaPeriod) {
             fireSolenoid();
-            if(i < 4){
+            if (i < 4) {
               waitType = 0;
               i++;
               startWaitingTime = millis();
-              }
-            else if(j <= 2){
-                i = 0;
-                j++;
-                waitType = 2;
-                startWaitingTime = millis();
-            }
-            else{
+            } else if (j <= 2) {
+              i = 0;
+              j++;
+              waitType = 2;
+              startWaitingTime = millis();
+            } else {
               //set tea time chime to finish days work
-              
-              if(millis() - startWaitingTime > tea){
+
+              if (millis() - startWaitingTime > tea) {
                 fireSolenoid();
-              inPomodoro = 0; 
-              stateNumber = 0;
-              startTimeChime = 0;
-              startWaitingTime = 0;
+                inPomodoro = 0;
+                stateNumber = 0;
+                startTimeChime = 0;
+                startWaitingTime = 0;
+                i = 0;
+                j = 0;
+              }
             }
-          }        
-        break;
-        
-        case 2:  
+            break;
+
+            case 2:
               Serial.print("\nPomodoro Long Break");
-              if(millis() - startWaitingTime > pomodoroLongBreak){
+              if (millis() - startWaitingTime > pomodoroLongBreak) {
                 fireSolenoid();
                 j++;
-                if(j <= 2){
+                if (j <= 2) {
                   waitType = 0;
                   startWaitingTime = millis();
                 }
-               
-            }
-          break;  
-          //delay(pomodoroShortBreak);
-          //while (millis() - timer2 < 500){}
-          //Serial.print("\nreached pomodoro3");
+              }
+              break;
+              //delay(pomodoroShortBreak);
+              //while (millis() - timer2 < 500){}
+              //Serial.print("\nreached pomodoro3");
           }
-          } 
-          
-        
-        //if (j == 2) { break; }  //edge case not needed on last run as one works 6 hours a day!
-        
-        //delay(pomodoroLongBreak);
-       // fireSolenoid();
+      }
+
+
+      //if (j == 2) { break; }  //edge case not needed on last run as one works 6 hours a day!
+
+      //delay(pomodoroLongBreak);
+      // fireSolenoid();
       //inTea = 0;
       //inMettaBhavana = 0;
       //inPomodoro = 0
