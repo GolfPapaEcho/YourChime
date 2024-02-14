@@ -18,10 +18,11 @@ unsigned short etButtonDelay = 2000;
 unsigned short mettaBhavanaButtonDelay = 4000;
 unsigned short pomodoroButtonDelay = 6000;
 unsigned long switchPollDelay = 125;
-unsigned long pomodoroWorkTime = 1200000;   //for testing set to 3000 for production set to 1200000;
-unsigned long pomodoroLongBreak = 1800000;  //for testing set to 5000 sec for production set to 1800000;
-unsigned long mettaBhavanaPeriod = 600000;  //for testing set to 2000 for production set to 600000; //used for both Metta Bhavana and pomodoroShortBreak
-unsigned long tea = 180000;               //for testing set to 1800 for production set to 180000
+unsigned long pomodoroWorkTime = 1200000;   //for testing set to 3000 ms for production set to 1200000 ms;
+unsigned long pomodoroLongBreak = 1800000;  //for testing set to 5000 ms for production set to 1800000 ms;
+unsigned long pomodoroShortBreak = 300000;  //for testing set to 1000 ms for production set to 300000 ms;
+unsigned long mettaBhavanaPeriod = 600000;  //for testing set to 2000 for production set to 600000 ms;
+unsigned long tea = 180000;               //for testing set to 1800 ms for production set to 180000 ms;
 unsigned long startWaitingTime;
 unsigned long startTimeChime = 0;
 
@@ -193,7 +194,7 @@ void loop() {
 
         case 1:
           Serial.print("\nPomodoro Short Break");
-          if (millis() - startWaitingTime > mettaBhavanaPeriod) {
+          if (millis() - startWaitingTime > pomodoroShortBreak) {
             fireSolenoid();
             if (i < 4) {
               waitType = 0;
