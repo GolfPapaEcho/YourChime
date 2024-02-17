@@ -232,20 +232,9 @@ void loop() {
                 else{startWaitingTime = millis();}
               }
               break;
-              //delay(pomodoroShortBreak);
-              //while (millis() - timer2 < 500){}
-              //Serial.print("\nreached pomodoro3");
+          
           }
       }
-
-
-      //if (j == 2) { break; }  //edge case not needed on last run as one works 6 hours a day!
-
-      //delay(pomodoroLongBreak);
-      // fireSolenoid();
-      //inTea = 0;
-      //inMettaBhavana = 0;
-      //inPomodoro = 0
       break;
   }
   // save the Reading. Next time through the loop, it'll be the lastButtonState
